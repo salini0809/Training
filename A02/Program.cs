@@ -5,13 +5,13 @@
 // Program.cs
 // Program to generate a random number between 1 and 100 and allow the user to guess it.
 // ------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
 using static System.Console;
+
 class Program {
    static void Main (string[] args) {
-      do {
+      PlayGame ();
+      while (PlayAgain ())
          PlayGame ();
-      } while (PlayAgain ());
       WriteLine ("Thank you for playing!");
    }
    static void PlayGame () {
@@ -29,11 +29,16 @@ class Program {
    }
    static bool PlayAgain () {
       while (true) {
-         Write ("Do you want to play again? (y/n): ");
-         string? input = ReadLine ()?.ToLower ();
-         if (input == "y" || input == "n")
-            return input == "y" ? true : false;
-         WriteLine ("Invalid input. Please enter (Y)es or (N)o.");
+         Write ("Do you want to play again? (Y/N): ");
+         ConsoleKey key = ReadKey ().Key;
+         WriteLine ();
+         switch (key) {
+            case ConsoleKey.Y: return true;
+            case ConsoleKey.N: return false;
+            default:
+               WriteLine ("Invalid input. Please press (Y)es or (N)o.");
+               break;
+         }
       }
    }
 }
