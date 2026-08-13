@@ -14,10 +14,8 @@ class Program {
       WriteLine ("Press \n L-Low \n H-High \n C-Correct \nfor each guess ");
       while (low <= high) {
          int guess = (low + high) / 2;
-         Write ($"Is your number {guess}?");
-         ConsoleKey key = ReadKey ().Key;
-         WriteLine ();
-         switch (key) {
+         Write ($"\nIs your number {guess}?");
+         switch (ReadKey ().Key) {
             case ConsoleKey.L:
                low = guess + 1;
                break;
@@ -25,13 +23,13 @@ class Program {
                high = guess - 1;
                break;
             case ConsoleKey.C:
-               WriteLine ($"I guessed your number! It is {guess}.");
+               WriteLine ($"\nI guessed your number! It is {guess}.");
                return;
             default:
-               WriteLine ("Invalid input. Enter (L)ow or (H)igh or (C)orrect");
+               Write ("\nInvalid input. Enter (L)ow or (H)igh or (C)orrect");
                break;
          }
       }
-      WriteLine ("Your answers were inconsistent.");
+      WriteLine ("\nYour answers were inconsistent.");
    }
 }
