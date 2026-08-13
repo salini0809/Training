@@ -9,10 +9,9 @@ using static System.Console;
 
 class Program {
    static void Main (string[] args) {
-      PlayGame ();
-      while (PlayAgain ())
-         PlayGame ();
-      WriteLine ("Thank you for playing!");
+      do PlayGame ();
+      while (PlayAgain ());
+      WriteLine ("\nThank you for playing!");
    }
    static void PlayGame () {
       int SecretNumber = new Random ().Next (1, 101), attempts = 0, guess;
@@ -23,20 +22,18 @@ class Program {
             continue;
          }
          attempts++;
-         WriteLine (guess == SecretNumber ? $"You have guessed the number in {attempts} attempts."
+         WriteLine (guess == SecretNumber ? $"You have guessed the number in {attempts} attempts.\n"
                    : guess < SecretNumber ? "Your guess is too low." : "Your guess is too high.");
       } while (guess != SecretNumber);
    }
    static bool PlayAgain () {
       while (true) {
          Write ("Do you want to play again? (Y/N): ");
-         ConsoleKey key = ReadKey ().Key;
-         WriteLine ();
-         switch (key) {
-            case ConsoleKey.Y: return true;
+         switch (ReadKey ().Key) {
+            case ConsoleKey.Y: WriteLine (); return true;
             case ConsoleKey.N: return false;
             default:
-               WriteLine ("Invalid input. Please press (Y)es or (N)o.");
+               WriteLine ("\nInvalid input. Please press (Y)es or (N)o.");
                break;
          }
       }
