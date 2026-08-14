@@ -6,6 +6,7 @@
 // Program to generate a random number between 1 and 100 and allow the user to guess it.
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
+using static System.ConsoleColor;
 
 class Program {
    static void Main (string[] args) {
@@ -14,17 +15,24 @@ class Program {
       WriteLine ("\nThank you for playing!");
    }
    static void PlayGame () {
-      int SecretNumber = new Random ().Next (1, 101), attempts = 0, guess;
+      int secretNumber = new Random ().Next (1, 101), attempts = 0, guess;
       do {
-         Write ("Enter the number you have guessed between 1 and 100 : ");
+         Write ("Guess a number between 1 and 100 : ");
          if (!int.TryParse (ReadLine (), out guess) || guess < 1 || guess > 100) {
-            WriteLine ("Please enter a valid number");
+            PrintMsg (("Please enter a valid number", Magenta));
             continue;
          }
          attempts++;
-         WriteLine (guess == SecretNumber ? $"You have guessed the number in {attempts} attempts.\n"
-                   : guess < SecretNumber ? "Your guess is too low." : "Your guess is too high.");
-      } while (guess != SecretNumber);
+         PrintMsg (guess == secretNumber ? ("You have guessed the number in " +
+                   $"{attempts} attempts.\n", Green)
+                   : guess < secretNumber ? ("Your guess is too low.", Yellow)
+                   : ("Your guess is too high.", Red));
+      } while (guess != secretNumber);
+   }
+   static void PrintMsg ((string message, ConsoleColor color) result) {
+      ForegroundColor = result.color;
+      WriteLine (result.message);
+      ResetColor ();
    }
    static bool PlayAgain () {
       while (true) {
@@ -33,9 +41,10 @@ class Program {
             case ConsoleKey.Y: WriteLine (); return true;
             case ConsoleKey.N: return false;
             default:
-               WriteLine ("\nInvalid input. Please press (Y)es or (N)o.");
+               PrintMsg (("\nInvalid input. Please press (Y)es or (N)o.", Magenta));
                break;
          }
       }
    }
 }
+
