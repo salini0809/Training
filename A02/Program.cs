@@ -14,6 +14,8 @@ class Program {
       while (PlayAgain ());
       WriteLine ("\nThank you for playing!");
    }
+
+   // Generates a secret number,validates guesses,tracks attempts,and displays color-coded feedback.
    static void PlayGame () {
       int secretNumber = new Random ().Next (1, 101), attempts = 0, guess;
       do {
@@ -30,11 +32,15 @@ class Program {
          PrintMsg (message, color);
       } while (guess != secretNumber);
    }
+
+   // Displays a message in the specified color and resets the console color.
    static void PrintMsg (string message, ConsoleColor color) {
       ForegroundColor = color;
       WriteLine (message);
       ResetColor ();
    }
+
+   // Prompts the user to play again and returns true for 'Y' and false for 'N'.
    static bool PlayAgain () {
       while (true) {
          Write ("Do you want to play again? (Y/N): ");
@@ -48,5 +54,3 @@ class Program {
       }
    }
 }
-
-
