@@ -19,19 +19,20 @@ class Program {
       do {
          Write ("Guess a number between 1 and 100 : ");
          if (!int.TryParse (ReadLine (), out guess) || guess < 1 || guess > 100) {
-            PrintMsg (("Please enter a valid number", Magenta));
+            PrintMsg ("Please enter a valid number", Red);
             continue;
          }
          attempts++;
-         PrintMsg (guess == secretNumber ? ("You have guessed the number in " +
+         var (message, color) = guess == secretNumber ? ("You have guessed the number in " +
                    $"{attempts} attempts.\n", Green)
                    : guess < secretNumber ? ("Your guess is too low.", Yellow)
-                   : ("Your guess is too high.", Red));
+                   : ("Your guess is too high.", Magenta);
+         PrintMsg (message, color);
       } while (guess != secretNumber);
    }
-   static void PrintMsg ((string message, ConsoleColor color) result) {
-      ForegroundColor = result.color;
-      WriteLine (result.message);
+   static void PrintMsg (string message, ConsoleColor color) {
+      ForegroundColor = color;
+      WriteLine (message);
       ResetColor ();
    }
    static bool PlayAgain () {
@@ -41,10 +42,11 @@ class Program {
             case ConsoleKey.Y: WriteLine (); return true;
             case ConsoleKey.N: return false;
             default:
-               PrintMsg (("\nInvalid input. Please press (Y)es or (N)o.", Magenta));
+               PrintMsg ("\nInvalid input. Please press (Y)es or (N)o.", Red);
                break;
          }
       }
    }
 }
+
 
