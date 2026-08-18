@@ -9,27 +9,51 @@ using static System.Console;
 
 class Program {
    static void Main (string[] args) {
+      do {
+         int guessedNumber = PlayGame ();
+         Verification (guessedNumber);
+      } while (PlayAgain ());
+      WriteLine ("\nThank you for playing!");
+   }
+
+   // Uses binary search to narrow the range and guess the user's number.
+   static int PlayGame () {
       int low = 1, high = 100;
-      WriteLine ("Think of a number between 1 and 100.");
-      WriteLine ("Press \n L-Low \n H-High \n C-Correct \nfor each guess ");
-      while (low <= high) {
+      WriteLine ("\nThink of a number between 1 and 100.");
+      WriteLine ("I will try to guess it. Please answer my questions with (Y)es or (N)o.");
+      while (low < high) {
          int guess = (low + high) / 2;
-         Write ($"\nIs your number {guess}?");
+         Write ($"\nIs your number greater than {guess}? ");
+         if (GetYesNo ()) low = guess + 1;
+         else high = guess;
+      }
+      return low;
+   }
+
+   // Verifies whether the guessed number is correct.
+   static void Verification (int guessedNumber) {
+      Write ($"\nI think your number is {guessedNumber}. Is that correct? ");
+      WriteLine (GetYesNo ()
+         ? $"\nHurray! I guessed your number. It is {guessedNumber}!"
+         : "\nYour answers were inconsistent.");
+   }
+
+   // Asks the user whether to play again.
+   static bool PlayAgain () {
+      Write ("\nDo you want to play again? (Y/N): ");
+      return GetYesNo ();
+   }
+
+   // Gets a valid Yes/No response from the user.
+   static bool GetYesNo () {
+      while (true) {
          switch (ReadKey ().Key) {
-            case ConsoleKey.L:
-               low = guess + 1;
-               break;
-            case ConsoleKey.H:
-               high = guess - 1;
-               break;
-            case ConsoleKey.C:
-               WriteLine ($"\nI guessed your number! It is {guess}.");
-               return;
+            case ConsoleKey.Y: return true;
+            case ConsoleKey.N: return false;
             default:
-               Write ("\nInvalid input. Enter (L)ow or (H)igh or (C)orrect");
+               Write ("\nInvalid input. Please press (Y)es or (N)o: ");
                break;
          }
       }
-      WriteLine ("\nYour answers were inconsistent.");
    }
 }
