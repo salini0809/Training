@@ -11,8 +11,9 @@ class Program {
    static void Main (string[] args) {
       do {
          int guessedNumber = PlayGame ();
-         Verification (guessedNumber);
-      } while (PlayAgain ());
+         WriteLine ($"\nI guessed your number it is {guessedNumber}");
+         Write ("\nDo you want to play again? (Y/N): ");
+      } while (GetYesNo ());
       WriteLine ("\nThank you for playing!");
    }
 
@@ -28,20 +29,6 @@ class Program {
          else high = guess;
       }
       return low;
-   }
-
-   // Verifies whether the guessed number is correct.
-   static void Verification (int guessedNumber) {
-      Write ($"\nI think your number is {guessedNumber}. Is that correct? ");
-      WriteLine (GetYesNo ()
-         ? $"\nHurray! I guessed your number. It is {guessedNumber}!"
-         : "\nYour answers were inconsistent.");
-   }
-
-   // Asks the user whether to play again.
-   static bool PlayAgain () {
-      Write ("\nDo you want to play again? (Y/N): ");
-      return GetYesNo ();
    }
 
    // Gets a valid Yes/No response from the user.
