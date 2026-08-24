@@ -1,10 +1,17 @@
-﻿using static System.Console;
+﻿// ------------------------------------------------------------------------------------------------
+// Training ~ A training program for new joinees at Metamation, Batch- July 2026.
+// Copyright (c) Metamation India.
+// ------------------------------------------------------------------------------------------------
+// Program.cs
+// Spellbee game
+// ------------------------------------------------------------------------------------------------
+using static System.Console;
 class Program {
    static void Main () {
       char[] letters = {'U', 'X', 'A', 'L', 'T', 'N', 'E'};
       char requiredLetter = letters[0];
       List<(string Word, int Score, bool Pangram)> results = new ();
-      foreach (string line in File.ReadLines ("C:\\Users\\kannansa\\Downloads\\words 1.txt")) {
+      foreach (string line in File.ReadLines ("words 1.txt")) {
          string word = line.Trim ();
          if (IsValidWord (word, requiredLetter, letters)) {
             bool pangram = IsPangram (word, letters);
