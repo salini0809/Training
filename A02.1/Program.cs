@@ -19,11 +19,11 @@ class Program {
 
    // Uses binary search to narrow the range and guess the user's number.
    static int PlayGame () {
-      int low = 1, high = 100;
+      int low = 1, high = 100, guess;
       WriteLine ("\nThink of a number between 1 and 100.");
       WriteLine ("I will try to guess it. Please answer my questions with (Y)es or (N)o.");
       while (low < high) {
-         int guess = (low + high) / 2;
+         guess = (low + high) / 2;
          Write ($"\nIs your number greater than {guess}? ");
          if (GetYesNo ()) low = guess + 1;
          else high = guess;
