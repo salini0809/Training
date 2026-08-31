@@ -12,7 +12,7 @@ class Program {
       char[] letters = { 'U', 'X', 'A', 'L', 'T', 'N', 'E' };
       char requiredLetter = letters[0];
       List<(string Word, int Score, bool Pangram)> results = new ();
-      foreach (string line in File.ReadLines ("words 1.txt")) {
+      foreach (string line in File.ReadLines ("words.txt")) {
          string word = line.Trim ();
          if (IsValidWord (word, requiredLetter, letters)) {
             bool pangram = IsPangram (word, letters);
