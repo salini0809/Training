@@ -11,7 +11,7 @@ using static System.ConsoleColor;
 class Program {
    static void Main (string[] args) {
       WriteLine ("Think of a number between 0 and 127, I'll guess it!");
-      WriteLine ("Please answer my questions with (Y)es or (N)o");
+      WriteLine ("Please answer my questions with (Y)es or (N)o\n");
       int number = 0, divisor = 2, remainder = 1;
       for (int i = 0; i < 7; i++) {
          Write ($"When divided by {divisor}, is the remainder >= {remainder} ? ");
@@ -21,7 +21,7 @@ class Program {
                PrintMsg ("Y", Blue); break;
             case ConsoleKey.N: PrintMsg ("N", Magenta); break;
             default:
-               WriteLine ("\nInvalid Input", Red);
+               PrintMsg ("Invalid Input", Red);
                i--; continue;
          }
          divisor *= 2; remainder *= 2;
@@ -29,7 +29,7 @@ class Program {
       PrintMsg ($"The number you thought of is {number}", Green);
    }
 
-   //Prints the specified message in the given color.
+   // Prints the specified message in the given color
    static void PrintMsg (string msg, ConsoleColor color) {
       ForegroundColor = color;
       WriteLine (msg);
