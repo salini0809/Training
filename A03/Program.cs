@@ -3,12 +3,13 @@
 // Copyright (c) Metamation India.
 // ------------------------------------------------------------------------------------------------
 // Program.cs
-// Spellbee game
+// Program to find all valid Spelling Bee words from a dictionary, calculate their scores,
+// identify pangrams, and display the results in descending order of score.
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
 class Program {
    static void Main () {
-      char[] letters = {'U', 'X', 'A', 'L', 'T', 'N', 'E'};
+      char[] letters = { 'U', 'X', 'A', 'L', 'T', 'N', 'E' };
       char requiredLetter = letters[0];
       List<(string Word, int Score, bool Pangram)> results = new ();
       foreach (string line in File.ReadLines ("words 1.txt")) {
