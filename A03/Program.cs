@@ -7,27 +7,23 @@
 // identify pangrams, and display the results in descending order of score.
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
+using static System.ConsoleColor;
 
 class Program {
+   static char[] letters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
+   static List<(string Word, int Score, bool Pangram)> results = [];
    static void Main () {
-      char[] letters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
-      char requiredLetter = letters[0];
+      string[] words = File.ReadAllLines ("words.txt");
       int total = 0;
-      List<(string Word, int Score, bool Pangram)> results = [];
-      foreach (string line in File.ReadLines ("words.txt")) {
-         string word = line.Trim ();
-         if (IsValidWord (word, requiredLetter, letters)) {
-            bool pangram = IsPangram (word, letters);
-            int score = (word.Length > 4 ? word.Length : 1) + (pangram ? 7 : 0);
-            results.Add ((word, score, pangram));
-         }
+      foreach (string word in words.Select (word => word.Trim ()).Where (IsValidWord)) {
+         bool pangram = letters.All (word.Contains);
+         int score = (word.Length > 4 ? word.Length : 1) + (pangram ? 7 : 0);
+         results.Add ((word, score, pangram));
       }
-      results = [.. results.OrderByDescending (x => x.Score)
-                .ThenBy (x => x.Word)];
+      results = [.. results.OrderByDescending (x => x.Score).ThenBy (x => x.Word)];
       foreach (var (Word, Score, Pangram) in results) {
          total += Score;
-         if (Pangram) ForegroundColor = ConsoleColor.Green;
-         else ResetColor ();
+         ForegroundColor = Pangram ? Green : White;
          WriteLine ($"{Score,2}. {Word}");
       }
       ResetColor ();
@@ -35,10 +31,6 @@ class Program {
    }
 
    // Checks if the word is valid based on length, required letter, and allowed letters.
-   static bool IsValidWord (string word, char required, char[] allowed) =>
-      word.Length >= 4 && word.Contains (required) && word.All (allowed.Contains);
-
-   // Checks if the word contains every allowed letter, making it a pangram.
-   static bool IsPangram (string word, char[] allowed) =>
-     allowed.All (word.Contains);
+   static bool IsValidWord (string word)
+      => word.Length >= 4 && word.Contains (letters[0]) && word.All (letters.Contains);
 }
