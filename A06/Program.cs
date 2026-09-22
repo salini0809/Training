@@ -129,8 +129,8 @@ class Program {
          WriteLine ($"Solution {index + 1} of {solutions.Count}");
          WriteLine ();
          PrintBoard (solutions[index], n);
-         if (index == solutions.Count - 1)
-            return;
+         //if (index == solutions.Count - 1)
+         //   return;
          WriteLine ();
          WriteLine ("Press: [→]- Next [←]- Previous [Q]- Quit");
          switch (ReadKey (true).Key) {
