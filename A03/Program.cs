@@ -12,7 +12,7 @@ using static System.ConsoleColor;
 class Program {
    static void Main () {
       char[] letters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
-      List<(string Word, int Score, bool Pangram)> results = [];
+      List<(string word, int score, bool pangram)> results = [];
       string[] words = File.ReadAllLines ("words.txt");
       int total = 0;
       foreach (string word in words.Select (word => word.Trim ()).Where (IsValidWord)) {
@@ -20,12 +20,12 @@ class Program {
          int score = (word.Length > 4 ? word.Length : 1) + (pangram ? 7 : 0);
          results.Add ((word, score, pangram));
       }
-      results = [.. results.OrderByDescending (x => x.Score).ThenBy (x => x.Word)];
-      foreach (var (Word, Score, Pangram) in results) {
-         total += Score;
-         if (Pangram) ForegroundColor = Green;
+      results = [.. results.OrderByDescending (x => x.score).ThenBy (x => x.word)];
+      foreach (var (word, score, pangram) in results) {
+         total += score;
+         if (pangram) ForegroundColor = Green;
          else ResetColor ();
-         WriteLine ($"{Score,2}. {Word}");
+         WriteLine ($"{score,2}. {word}");
       }
       ResetColor ();
       WriteLine ($"----\n{total} total");
