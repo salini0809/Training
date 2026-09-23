@@ -11,13 +11,9 @@ using static System.Console;
 class Program {
    static void Main () {
       OutputEncoding = Encoding.UTF8;
-      List<int[]> allSolutions = SolveNQueens (N);
-      List<int[]> uniqueSolutions = RemoveIdenticalSolutions (allSolutions, N);
-      WriteLine ("Eight queens problem ");
-      WriteLine ($"Total solutions: {allSolutions.Count}");
-      WriteLine ($"Unique solutions: {uniqueSolutions.Count}");
-      List<int[]> solutions = SelectSolutions (allSolutions, uniqueSolutions);
-      BrowseSolutions (solutions, N);
+      WriteLine ("Eight queens problem");
+      var (solutions, title) = SelectSolutions (N);
+      BrowseSolutions (solutions, N, title);
    }
 
    static void Solve (int col, int n, int[] queens, bool[] usedRow, bool[] usedLowerDiag,
@@ -39,17 +35,17 @@ class Program {
    }
 
    static List<int[]> SolveNQueens (int n) {
-      int[] queens = new int[n];
-      bool[] usedRow = new bool[n];
-      bool[] usedLowerDiag = new bool[2 * n - 1];
-      bool[] usedUpperDiag = new bool[2 * n - 1];
+      var queens = new int[n];
+      var usedRow = new bool[n];
+      var usedLowerDiag = new bool[2 * n - 1];
+      var usedUpperDiag = new bool[2 * n - 1];
       List<int[]> solutions = [];
       Solve (0, n, queens, usedRow, usedLowerDiag, usedUpperDiag, solutions);
       return solutions;
    }
 
    static int[] Transform (int[] pos, int n, Func<int, int, (int newRow, int newCol)> map) {
-      int[] result = new int[n];
+      var result = new int[n];
       for (int col = 0; col < n; col++) {
          var (newRow, newCol) = map (pos[col], col);
          result[newCol] = newRow;
@@ -107,30 +103,29 @@ class Program {
          yield return s;
    }
 
-   static List<int[]> SelectSolutions (List<int[]> allSolutions, List<int[]> uniqueSolutions) {
+   static (List<int[]>, string) SelectSolutions (int n) {
       Write ("Press Key to see [A]ll or [U]nique solutions:");
       while (true) {
          switch (ReadKey (true).Key) {
-            case ConsoleKey.A:
-               return allSolutions;
+            case ConsoleKey.A: return (SolveNQueens (n), "All Solutions");
             case ConsoleKey.U:
-               return uniqueSolutions;
+               var allSolutions = SolveNQueens (n);
+               return (RemoveIdenticalSolutions (allSolutions, n), "Unique Solutions");
             default:
-               Write ("\nInvalid key. Press A or U:");
+               Write ("\nInvalid key. Press A or U: ");
                break;
          }
       }
    }
 
-   static void BrowseSolutions (List<int[]> solutions, int n) {
+   static void BrowseSolutions (List<int[]> solutions, int n, string title) {
       int index = 0;
       while (true) {
          Clear ();
+         WriteLine (title);
          WriteLine ($"Solution {index + 1} of {solutions.Count}");
          WriteLine ();
          PrintBoard (solutions[index], n);
-         //if (index == solutions.Count - 1)
-         //   return;
          WriteLine ();
          WriteLine ("Press: [→]- Next [←]- Previous [Q]- Quit");
          switch (ReadKey (true).Key) {
