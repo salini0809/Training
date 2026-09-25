@@ -7,13 +7,10 @@
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
 
-string[] words = File.ReadAllLines ("words.txt");
 Dictionary<char, int> frequency = [];
-foreach (string word in words) {
-   foreach (char ch in word) {
-      if (char.IsLetter (ch))
-         frequency[ch] = frequency.GetValueOrDefault (ch) + 1;
-   }
+foreach (char ch in File.ReadAllText ("words.txt")) {
+   if (char.IsLetter (ch))
+      frequency[ch] = frequency.GetValueOrDefault (ch) + 1;
 }
 WriteLine ("Seven most frequently occuring letters in the word list are:");
 foreach (var item in frequency.OrderByDescending (x => x.Value).Take (7))
