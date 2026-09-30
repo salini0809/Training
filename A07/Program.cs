@@ -1,4 +1,11 @@
-﻿using static System.Console;
+﻿// ------------------------------------------------------------------------------------------------
+// Training ~ A training program for new joinees at Metamation, Batch- July 2026.
+// Copyright (c) Metamation India.
+// ------------------------------------------------------------------------------------------------
+// Program.cs
+// Program to convert string to Double
+// ------------------------------------------------------------------------------------------------
+using static System.Console;
 
 class Program {
    static void Main () {
