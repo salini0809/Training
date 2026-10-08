@@ -11,106 +11,79 @@ using static System.Console;
 class Program {
    static void Main () {
       OutputEncoding = Encoding.UTF8;
-      WriteLine ("Eight queens problem");
-      var (solutions, title) = SelectSolutions (N);
-      BrowseSolutions (solutions, N, title);
+      WriteLine ("Eight Queens problem");
+      var (solutions, title) = SelectSolutions ();
+      BrowseSolutions (solutions, title);
    }
 
-   static void Solve (int col, int n, int[] queens, bool[] usedRow, bool[] usedLowerDiag,
-       bool[] usedUpperDiag, List<int[]> solutions) {
-      if (col == n) {
-         solutions.Add ((int[])queens.Clone ());
-         return;
-      }
-      for (int row = 0; row < n; row++) {
-         int lower = row + col;
-         int upper = n - 1 + col - row;
-         if (usedRow[row] || usedLowerDiag[lower] || usedUpperDiag[upper])
-            continue;
-         queens[col] = row;
-         usedRow[row] = usedLowerDiag[lower] = usedUpperDiag[upper] = true;
-         Solve (col + 1, n, queens, usedRow, usedLowerDiag, usedUpperDiag, solutions);
-         usedRow[row] = usedLowerDiag[lower] = usedUpperDiag[upper] = false;
-      }
-   }
-
-   static List<int[]> SolveNQueens (int n) {
-      var queens = new int[n];
-      var usedRow = new bool[n];
-      var usedLowerDiag = new bool[2 * n - 1];
-      var usedUpperDiag = new bool[2 * n - 1];
+   // Finds all valid N-Queens solutions and optionally keeps only unique solutions.
+   static List<int[]> SolveNQueens (bool uniqueOnly) {
       List<int[]> solutions = [];
-      Solve (0, n, queens, usedRow, usedLowerDiag, usedUpperDiag, solutions);
+      int[] pos = new int[N];
+      PlaceQueen (0);
       return solutions;
-   }
 
-   static int[] Transform (int[] pos, int n, Func<int, int, (int newRow, int newCol)> map) {
-      var result = new int[n];
-      for (int col = 0; col < n; col++) {
-         var (newRow, newCol) = map (pos[col], col);
-         result[newCol] = newRow;
+      // Recursively places a queen in each column using backtracking.
+      void PlaceQueen (int col) {
+         for (pos[col] = 0; pos[col] < N; pos[col]++) {
+            if (IsValid (col)) {
+               if (col == N - 1) AddSolution ([.. pos]);
+               else PlaceQueen (col + 1);
+            }
+         }
       }
-      return result;
-   }
 
-   static int[] Rotate90 (int[] pos, int n) =>
-       Transform (pos, n, (row, col) => (col, n - 1 - row));
-
-   static int[] MirrorHorizontal (int[] pos, int n) =>
-       Transform (pos, n, (row, col) => (n - 1 - row, col));
-
-   static string ToKey (int[] pos) => string.Join (",", pos);
-
-   static string GetCanonicalForm (int[] pos, int n) {
-      var rotations = new List<int[]> { pos };
-      for (int i = 0; i < ROTATIONS - 1; i++)
-         rotations.Add (Rotate90 (rotations[^1], n));
-      var mirrored = MirrorHorizontal (pos, n);
-      var mirroredRotations = new List<int[]> { mirrored };
-      for (int i = 0; i < ROTATIONS - 1; i++)
-         mirroredRotations.Add (Rotate90 (mirroredRotations[^1], n));
-      return rotations.Concat (mirroredRotations).Select (ToKey)
-         .OrderBy (s => s, StringComparer.Ordinal).First ();
-   }
-
-   static List<int[]> RemoveIdenticalSolutions (List<int[]> allSolutions, int n) {
-      var seen = new HashSet<string> ();
-      var unique = new List<int[]> ();
-      foreach (var solution in allSolutions) {
-         if (seen.Add (GetCanonicalForm (solution, n)))
-            unique.Add (solution);
+      // Checks whether the queen at the current column is safe from previously placed queens.
+      bool IsValid (int col) {
+         for (int previousCol = 0; previousCol < col; previousCol++) {
+            int dy = Math.Abs (pos[col] - pos[previousCol]);
+            int dx = col - previousCol;
+            if (dy == 0 || dy == dx) return false;
+         }
+         return true;
       }
-      return unique;
-   }
 
-   static string BuildBorder (string edges, int n) =>
-       edges[0] + string.Join (edges[1].ToString (), Repeat (HORIZONTAL, n))
-      + edges[2];
-
-   static void PrintBoard (int[] pos, int n) {
-      WriteLine (BuildBorder (TOP, n));
-      for (int row = 0; row < n; row++) {
-         Write (VERTICAL);
-         for (int col = 0; col < n; col++)
-            Write ((pos[col] == row ? QUEEN : EMPTY) + VERTICAL);
-         WriteLine ();
-         WriteLine (BuildBorder (row < n - 1 ? MIDDLE : BOTTOM, n));
+      // Adds the solution directly or only if it is unique, depending on the selected mode.
+      void AddSolution (int[] solution) {
+         if (!uniqueOnly || IsUnique (solution))
+            solutions.Add (solution);
       }
+
+      // Checks whether the solution is different from all previously stored solutions.
+      bool IsUnique (int[] solution) {
+         int[] temp = solution;
+         for (int i = 0; i < 4; i++) {
+            temp = Rotate (temp);
+            if (SolutionExists (temp) || SolutionExists (Mirror (temp))) return false;
+         }
+         return true;
+      }
+
+      // Checks whether an equivalent solution already exists in the solution list.
+      bool SolutionExists (int[] sol) => solutions.Any (x => x.SequenceEqual (sol));
    }
 
-   static IEnumerable<string> Repeat (string s, int count) {
-      for (int i = 0; i < count; i++)
-         yield return s;
+   // Rotates the chessboard solution by 90 degrees.
+   static int[] Rotate (int[] pos) {
+      int[] rotated = new int[N];
+      for (int col = 0; col < N; col++) {
+         int row = pos[col];
+         rotated[N - 1 - row] = col;
+      }
+      return rotated;
    }
+   // Creates a vertically mirrored version of the solution.
+   static int[] Mirror (int[] pos) => [.. pos.Reverse ()];
 
-   static (List<int[]>, string) SelectSolutions (int n) {
-      Write ("Press Key to see [A]ll or [U]nique solutions:");
+   // Gets the user's choice and returns either all or unique  solutions.
+   static (List<int[]>, string) SelectSolutions () {
+      Write ("Press Key to see [A]ll or [U]nique solutions: ");
       while (true) {
          switch (ReadKey (true).Key) {
-            case ConsoleKey.A: return (SolveNQueens (n), "All Solutions");
+            case ConsoleKey.A:
+               return (SolveNQueens (uniqueOnly: false), "All Solutions");
             case ConsoleKey.U:
-               var allSolutions = SolveNQueens (n);
-               return (RemoveIdenticalSolutions (allSolutions, n), "Unique Solutions");
+               return (SolveNQueens (uniqueOnly: true), "Unique Solutions");
             default:
                Write ("\nInvalid key. Press A or U: ");
                break;
@@ -118,33 +91,56 @@ class Program {
       }
    }
 
-   static void BrowseSolutions (List<int[]> solutions, int n, string title) {
-      int index = 0;
+   // Displays the solutions one by one and allows navigation between them.
+   static void BrowseSolutions (List<int[]> solutions, string title) {
+      int ind = 0;
       while (true) {
          Clear ();
          WriteLine (title);
-         WriteLine ($"Solution {index + 1} of {solutions.Count}");
-         WriteLine ();
-         PrintBoard (solutions[index], n);
+         WriteLine ($"Solution {ind + 1} of {solutions.Count}\n");
+         PrintBoard (solutions[ind]);
          WriteLine ();
          WriteLine ("Press: [→]- Next [←]- Previous [Q]- Quit");
          switch (ReadKey (true).Key) {
             case ConsoleKey.RightArrow:
-               if (index < solutions.Count - 1)
-                  index++;
+               if (ind < solutions.Count - 1) ind++;
                break;
             case ConsoleKey.LeftArrow:
-               if (index > 0)
-                  index--;
+               if (ind > 0)
+                  ind--;
                break;
-            case ConsoleKey.Q:
-               return;
-            default: Write ("\nInvalid Key. Press →, ← or Q:"); ReadKey (true); break;
+            case ConsoleKey.Q: return;
+            default:
+               Write ("\nInvalid Key. Press →, ← or Q:");
+               ReadKey (true);
+               break;
          }
       }
    }
 
-   #region Constants ------------------------------------------------
+   // Prints the given N-Queens solution as a formatted chessboard.
+   static void PrintBoard (int[] pos) {
+      WriteLine (BuildBorder (TOP));
+      for (int row = 0; row < N; row++) {
+         Write (VERTICAL);
+         for (int col = 0; col < N; col++) {
+            Write ((pos[col] == row ? QUEEN : EMPTY) + VERTICAL);
+         }
+         WriteLine ();
+         WriteLine (BuildBorder (row < N - 1 ? MIDDLE : BOTTOM));
+      }
+   }
+
+   // Builds a horizontal border for the chessboard.
+   static string BuildBorder (string edges) =>
+       edges[0] + string.Join (edges[1].ToString (), Repeat (HORIZONTAL, N)) + edges[2];
+
+   // generates a string repeatedly for the specified number of times.
+   static IEnumerable<string> Repeat (string s, int count) {
+      for (int i = 0; i < count; i++)
+         yield return s;
+   }
+   #region const-----------------------------------------------------------------------------------
    const string TOP = "┌┬┐";
    const string MIDDLE = "├┼┤";
    const string BOTTOM = "└┴┘";
@@ -152,7 +148,6 @@ class Program {
    const string HORIZONTAL = "────";
    const string EMPTY = "    ";
    const string QUEEN = " ♕  ";
-   const int ROTATIONS = 4;
    const int N = 8;
    #endregion
 }
