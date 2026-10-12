@@ -9,7 +9,7 @@ using static System.Console;
 
 class Program {
    static void Main () {
-      var testCases = new string[] {"+","12345","+123","-123","123.45",".45","45.","1e5",
+      var testCases = new string[] {"+","e5","12345","+123","-123","123.45",".45","45.","1e5",
          "1e+5","1e-5","1.25e3","1.25E3","  123.45  ","000123","1e308","1e-308","NaN","","1.2.3",
          "1e+","1e2e3","--123","12abc","1e309","1e-325"};
       foreach (string testCase in testCases) {
@@ -47,8 +47,7 @@ class Program {
          position++;
          double decimalNumber = 0;
          int decimalDigits = 0;
-         while (position < input.Length &&
-                char.IsDigit (input[position])) {
+         while (position < input.Length && char.IsDigit (input[position])) {
             int digit = input[position] - '0';
             decimalNumber = decimalNumber * 10 + digit;
             decimalDigits++;
@@ -58,8 +57,7 @@ class Program {
          number += decimalNumber / Math.Pow (10, decimalDigits);
       }
       // Rejects inputs that contain no digits, such as "." or "+.".
-      if (!hasDigits)
-         return NAN;
+      if (!hasDigits) return NAN;
       // Parses the optional exponent, supporting 'e' or 'E' with an optional sign.
       if (position < input.Length && (input[position] == 'e' || input[position] == 'E')) {
          position++;
@@ -77,14 +75,12 @@ class Program {
             position++;
          }
          // Rejects incomplete exponents such as "1e", "1e+", and "1e-".
-         if (!hasExpDigits)
-            return NAN;
+         if (!hasExpDigits) return NAN;
          exponent = expNegative ? -exponent : exponent;
          number *= Math.Pow (10, exponent);
       }
       // Rejects invalid trailing characters or malformed numbers such as "12abc" and "1.2.3".
-      if (position != input.Length)
-         return NAN;
+      if (position != input.Length) return NAN;
       // Applies the original sign and returns the final parsed value.
       return isNegative ? -number : number;
    }
