@@ -45,8 +45,7 @@ class Program {
 
       // Adds the solution directly or only if it is unique, depending on the selected mode.
       void AddSolution (int[] solution) {
-         if (!uniqueOnly || IsUnique (solution))
-            solutions.Add (solution);
+         if (!uniqueOnly || IsUnique (solution)) solutions.Add (solution);
       }
 
       // Checks whether the solution is different from all previously stored solutions.
@@ -93,7 +92,7 @@ class Program {
 
    // Displays the solutions one by one and allows navigation between them.
    static void BrowseSolutions (List<int[]> solutions, string title) {
-      int ind = 0;
+      int ind = 0; string msg = "";
       while (true) {
          Clear ();
          WriteLine (title);
@@ -101,18 +100,19 @@ class Program {
          PrintBoard (solutions[ind]);
          WriteLine ();
          WriteLine ("Press: [→]- Next [←]- Previous [Q]- Quit");
+         if (msg != "") Write (msg);
          switch (ReadKey (true).Key) {
             case ConsoleKey.RightArrow:
                if (ind < solutions.Count - 1) ind++;
+               msg = "";
                break;
             case ConsoleKey.LeftArrow:
-               if (ind > 0)
-                  ind--;
+               if (ind > 0) ind--;
+               msg = "";
                break;
             case ConsoleKey.Q: return;
             default:
-               Write ("\nInvalid Key. Press →, ← or Q:");
-               ReadKey (true);
+               msg = "Invalid Key. Press →, ← or Q:";
                break;
          }
       }
@@ -123,9 +123,8 @@ class Program {
       WriteLine (BuildBorder (TOP));
       for (int row = 0; row < N; row++) {
          Write (VERTICAL);
-         for (int col = 0; col < N; col++) {
+         for (int col = 0; col < N; col++)
             Write ((pos[col] == row ? QUEEN : EMPTY) + VERTICAL);
-         }
          WriteLine ();
          WriteLine (BuildBorder (row < N - 1 ? MIDDLE : BOTTOM));
       }
