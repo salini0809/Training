@@ -2,7 +2,7 @@
 // Training ~ A training program for new joinees at Metamation, Batch - July 2026.
 // Copyright (c) TRUMPF Metamation India.
 // ------------------------------------------------------------------------------------------------
-// TestCases.cs
+// Testcases.cs
 // Test cases for the TQueue<T> circular-buffer queue.
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
