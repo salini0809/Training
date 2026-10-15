@@ -1,4 +1,7 @@
 ﻿// ------------------------------------------------------------------------------------------------
+// Training ~ A training program for new joinees at Metamation, Batch - July 2026.
+// Copyright (c) TRUMPF Metamation India.
+// ------------------------------------------------------------------------------------------------
 // TQueue.cs
 // Generic FIFO queue stored in an array that is used as a circular buffer.
 // ------------------------------------------------------------------------------------------------
