@@ -8,7 +8,7 @@
 using static System.Console;
 
 #region Class TestCases----------------------------------------------------------------------------
-///<summary> Runs test cases for the circular-buffer queue </summary>
+/// <summary>Runs test cases for the circular-buffer queue</summary>
 class TestCases {
    #region Implementation--------------------------------------------
    // Runs every test and prints a summary
@@ -45,11 +45,12 @@ class TestCases {
    // Tests whether elements are dequeued in FIFO order
    static bool FifoOrder () {
       var q = new TQueue<string> ();
-      Fill (q, "red", "green", "blue");
-      return Drains (q, "red", "green", "blue");
+      var data = new[] { "red", "green", "blue" };
+      Fill (q, data);
+      return Drains (q, data);
    }
 
-   //Tests whether the queue reuses freed array slots correctly
+   // Tests whether the queue reuses freed array slots correctly
    static bool WrapAround () {
       var q = new TQueue<int> ();
       Fill (q, 1, 2, 3, 4);
@@ -62,8 +63,9 @@ class TestCases {
    // Tests whether the queue grows when its capacity is exceeded.
    static bool GrowWhenFull () {
       var q = new TQueue<int> ();
-      Fill (q, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-      return Drains (q, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+      var data = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+      Fill (q, data);
+      return Drains (q, data);
    }
 
    // Tests whether the queue grows correctly when the buffer is wrapped.
@@ -76,7 +78,7 @@ class TestCases {
       return Drains (q, 'C', 'D', 'E', 'F', 'G');
    }
 
-   //Runs a test case and records whether it passed or failed.
+   // Runs a test case and records whether it passed or failed.
    static void Check (string name, Func<bool> test) {
       bool ok;
       string note = "";
@@ -107,7 +109,7 @@ class TestCases {
    #endregion
 
    #region Private data----------------------------------------------
-   static int mPassed, mFailed;    //Number of test cases passed and failed
+   static int mPassed, mFailed;    // Number of test cases passed and failed
    #endregion
 }
 #endregion
