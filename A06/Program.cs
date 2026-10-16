@@ -92,7 +92,7 @@ class Program {
 
    // Displays the solutions one by one and allows navigation between them.
    static void BrowseSolutions (List<int[]> solutions, string title) {
-      int ind = 0; string msg = "";
+      int ind = 0;
       while (true) {
          Clear ();
          WriteLine (title);
@@ -100,20 +100,22 @@ class Program {
          PrintBoard (solutions[ind]);
          WriteLine ();
          WriteLine ("Press: [→]- Next [←]- Previous [Q]- Quit");
-         if (msg != "") Write (msg);
-         switch (ReadKey (true).Key) {
+         int row = CursorTop + 1;
+         ConsoleKey key;
+         while (true) {
+            key = ReadKey (true).Key;
+            if (key is ConsoleKey.RightArrow or ConsoleKey.LeftArrow or ConsoleKey.Q) break;
+            SetCursorPosition (0, row);
+            WriteLine ("Invalid Key. Press →, ← or Q.");
+         }
+         switch (key) {
             case ConsoleKey.RightArrow:
                if (ind < solutions.Count - 1) ind++;
-               msg = "";
                break;
             case ConsoleKey.LeftArrow:
                if (ind > 0) ind--;
-               msg = "";
                break;
             case ConsoleKey.Q: return;
-            default:
-               msg = "Invalid Key. Press →, ← or Q:";
-               break;
          }
       }
    }
