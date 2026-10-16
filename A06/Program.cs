@@ -71,6 +71,7 @@ class Program {
       }
       return rotated;
    }
+
    // Creates a vertically mirrored version of the solution.
    static int[] Mirror (int[] pos) => [.. pos.Reverse ()];
 
@@ -100,22 +101,21 @@ class Program {
          PrintBoard (solutions[ind]);
          WriteLine ();
          WriteLine ("Press: [→]- Next [←]- Previous [Q]- Quit");
-         int row = CursorTop + 1;
-         ConsoleKey key;
          while (true) {
-            key = ReadKey (true).Key;
-            if (key is ConsoleKey.RightArrow or ConsoleKey.LeftArrow or ConsoleKey.Q) break;
-            SetCursorPosition (0, row);
-            WriteLine ("Invalid Key. Press →, ← or Q.");
-         }
-         switch (key) {
-            case ConsoleKey.RightArrow:
-               if (ind < solutions.Count - 1) ind++;
-               break;
-            case ConsoleKey.LeftArrow:
-               if (ind > 0) ind--;
-               break;
-            case ConsoleKey.Q: return;
+            var key = ReadKey (true).Key;
+            switch (key) {
+               case ConsoleKey.RightArrow:
+                  if (ind < solutions.Count - 1) ind++;
+                  break;
+               case ConsoleKey.LeftArrow:
+                  if (ind > 0) ind--;
+                  break;
+               case ConsoleKey.Q: return;
+               default:
+                  WriteLine ("Invalid Key. Press →, ← or Q.");
+                  continue;
+            }
+            break;
          }
       }
    }
