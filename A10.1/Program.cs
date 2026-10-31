@@ -46,11 +46,8 @@ class Program {
             (B, ':') => (C, none),
             (C, '\\') => (D, none),
             (D or E, >= 'A' and <= 'Z') => (E, () => file.Append (ch)),
-            (E, '\\') => (D, () => {
-               folder.Append (folder.Length == 0 ? file : "\\" + file);
-               file.Clear ();
-            }
-            ),
+            (E, '\\') => (D, () => {folder.Append (folder.Length == 0 ? file : "\\" + file);
+                                    file.Clear ();}),
             (E, '.') when folder.Length > 0 => (F, none),
             (F or G, >= 'A' and <= 'Z') => (G, () => ext.Append (ch)),
             (G, '~') => (H, none),
