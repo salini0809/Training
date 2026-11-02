@@ -5,64 +5,67 @@
 // Program.cs
 // Implementation of file name parser with state machine.
 // ------------------------------------------------------------------------------------------------
-using static EState;
 using System.Text;
+using static EState;
 using static System.Console;
 
 #region class Program -----------------------------------------------------------------------------
 /// <summary>Parses file paths using a state machine and displays the parsing results</summary>
 class Program {
-   #region Methods---------------------------------------------------
-   /// <summary> Tests the parser with different file paths and displays the results</summary>
+   #region Methods --------------------------------------------------
+   /// <summary>Tests the parser with different file paths and displays the results</summary>
    public static void Main () {
       WriteLine ($"{"Input",-40}{"Drive",-8}{"Folder",-18}{"File",-16}{"Ext",-8}Result");
       WriteLine (new string ('-', 100));
-      int passed = 0;
-      foreach (var path in testPaths) {
-         var (drive, folder, file, ext) = Parse (path);
-         bool ok = drive.Length > 0;
+      int passed = 0; bool ok = false;
+      foreach (var path in sTestData) {
+         var result = Parse (path);
+         ok = result.drive.Length > 0;
          if (ok) passed++;
-         string Show (string s) => ok ? s : "-";
-         Write ($"{"\"" + path + "\"",-40}{Show (drive),-8}{Show (folder),-18}" +
-                        $"{Show (file),-16}{Show (ext),-8}");
+         Write ($"{"\"" + path + "\"",-40}{Show (result.drive),-8}{Show (result.folder),-18}"
+                + $"{Show (result.file),-16}{Show (result.extension),-8}");
          ForegroundColor = ok ? ConsoleColor.Green : ConsoleColor.Red;
          WriteLine (ok ? "Passed" : "Failed");
          ResetColor ();
       }
       WriteLine (new string ('-', 100));
-      WriteLine ($"{testPaths.Length} test paths: {passed} parsed, {testPaths.Length - passed} rejected.");
+      WriteLine ($"{sTestData.Length} test paths: {passed} parsed, {sTestData.Length - passed} rejected.");
+
+      // Displays the parsed value if the path is valid otherwise displays "-"
+      string Show (string s) => ok ? s : "-";
    }
    #endregion
 
-   #region Implementation--------------------------------------------
-   // Parses a file path and extracts the drive, folder, file name and extension.
-   static (string, string, string, string) Parse (string path) {
-      EState s = A;
+   #region Implementation -------------------------------------------
+   // Parses a file path and extracts the drive, folder, file name and extension
+   static ParseResult Parse (string path) {
+      EState state = A;
       Action none = () => { }, todo;
-      StringBuilder drive = new (), folder = new (), file = new (), ext = new ();
+      string drive = "";
+      StringBuilder folder = new (), file = new (), ext = new ();
       foreach (var ch in path.ToUpper () + '~') {
-         (s, todo) = (s, ch) switch {
-            (A, >= 'A' and <= 'Z') => (B, () => drive.Append (ch)),
+         (state, todo) = (state, ch) switch {
+            (A, >= 'A' and <= 'Z') => (B, () => drive += ch),
             (B, ':') => (C, none),
             (C, '\\') => (D, none),
             (D or E, >= 'A' and <= 'Z') => (E, () => file.Append (ch)),
-            (E, '\\') => (D, () => {folder.Append (folder.Length == 0 ? file : "\\" + file);
-                                    file.Clear ();}),
+            (E, '\\') => (D, () => { folder.Append (folder.Length == 0 ? file : "\\" + file); file.Clear (); }),
             (E, '.') when folder.Length > 0 => (F, none),
             (F or G, >= 'A' and <= 'Z') => (G, () => ext.Append (ch)),
             (G, '~') => (H, none),
             _ => (Z, none)
          };
          todo ();
-         if (s == Z) break;
+         if (state == Z) break;
       }
-      return s == H ? (drive.ToString (), folder.ToString (), file.ToString (), ext.ToString ()) : ("", "", "", "");
+      return state == H ? new ParseResult (drive, folder.ToString (), file.ToString (), ext.ToString ())
+                        : new ParseResult ("", "", "", "");
    }
    #endregion
 
-   #region Private data----------------------------------------------
-   // Contains valid and invalid file paths used to test the parser.
-   static string[] testPaths = {
+   #region Private data ---------------------------------------------
+   // Contains valid and invalid file paths used to test the parser
+   static string[] sTestData = {
          @"C:\ABC\DEF\README.TXT", @"C:\ABC\FILE.TXT", @"D:\A\B.C", @"Z:\FOLDER\FILE.EXT",
          @"A:\X\Y.Z", @"C:\A\B\C\D\E\F\G\FILE.TXT", @"C:\ABC\FILE.T",
          @"E:\PROJECTFILES\DOCUMENTATION.PDFX",@"C:\ABC\DEF\GHI\IMAGE.JPG",
@@ -77,7 +80,17 @@ class Program {
 }
 #endregion
 
-#region enum EStatte-------------------------------------------------------------------------------
+#region Struct Parseresult ------------------------------------------------------------------------
+/// <summary>Stores the parsed components of a file path</summary>
+readonly record struct ParseResult (
+   string drive,
+   string folder,
+   string file,
+   string extension
+);
+#endregion
+
+#region enum EState -------------------------------------------------------------------------------
 /// <summary>Represents the states used to validate and parse a file path</summary>
 enum EState {
    A,   // A: nothing read yet
