@@ -17,22 +17,17 @@ class Program {
    public static void Main () {
       WriteLine ($"{"Input",-40}{"Drive",-8}{"Folder",-18}{"File",-16}{"Ext",-8}Result");
       WriteLine (new string ('-', 100));
-      int passed = 0; bool ok = false;
+      int passed = 0; bool ok;
       foreach (var path in sTestData) {
          var result = Parse (path);
-         ok = result.drive.Length > 0;
-         if (ok) passed++;
-         Write ($"{"\"" + path + "\"",-40}{Show (result.drive),-8}{Show (result.folder),-18}"
-                + $"{Show (result.file),-16}{Show (result.extension),-8}");
+         if (ok = result.Drive.Length > 0) passed++;
+         Write ($"{"\"" + path + "\"",-40}{result}");
          ForegroundColor = ok ? ConsoleColor.Green : ConsoleColor.Red;
          WriteLine (ok ? "Passed" : "Failed");
          ResetColor ();
       }
       WriteLine (new string ('-', 100));
       WriteLine ($"{sTestData.Length} test paths: {passed} parsed, {sTestData.Length - passed} rejected.");
-
-      // Displays the parsed value if the path is valid otherwise displays "-"
-      string Show (string s) => ok ? s : "-";
    }
    #endregion
 
@@ -80,14 +75,14 @@ class Program {
 }
 #endregion
 
-#region Struct Parseresult ------------------------------------------------------------------------
-/// <summary>Stores the parsed components of a file path</summary>
-readonly record struct ParseResult (
-   string drive,
-   string folder,
-   string file,
-   string extension
-);
+#region Struct ParseResult ------------------------------------------------------------------------
+/// <summary>Stores the parsed components of a file path and provides formatted string representation</summary>
+readonly record struct ParseResult (string Drive, string Folder, string File, string Extension) {
+   #region Methods --------------------------------------------------
+   /// <summary>Returns the parsed file path components as a formatted string</summary>
+   public override string ToString () => $"{Drive,-8}{Folder,-18}{File,-16}{Extension,-8}";
+   #endregion
+}
 #endregion
 
 #region enum EState -------------------------------------------------------------------------------
