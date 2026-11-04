@@ -15,8 +15,9 @@ class Program {
    #region Methods --------------------------------------------------
    /// <summary>Tests the parser with different file paths and displays the results</summary>
    public static void Main () {
+      var header = new string ('-', 100);
       WriteLine ($"{"Input",-40}{"Drive",-8}{"Folder",-18}{"File",-16}{"Ext",-8}Result");
-      WriteLine (sHeader);
+      WriteLine (header);
       int passed = 0; bool ok;
       foreach (var path in sTestData) {
          if (ok = TryParse (path, out var result)) passed++;
@@ -25,7 +26,7 @@ class Program {
          WriteLine (ok ? "Passed" : "Failed");
          ResetColor ();
       }
-      WriteLine (sHeader);
+      WriteLine (header);
       WriteLine ($"{sTestData.Length} test paths: {passed} parsed, {sTestData.Length - passed} rejected.");
    }
    #endregion
@@ -72,7 +73,6 @@ class Program {
          @"C:\ABC\FILE.TXT~",@"CD:\ABC\FILE.TXT", @"C:\ABC:D", @"C:\\ABC\FILE.TXT",
          @"C:\DIR\\FILE.TXT",@"C:\DIR\ARCHIVE.TAR.GZ", "C:/ABC/FILE.TXT", @"C:\ABC\FILE\TXT"
     };
-   static string sHeader = new ('-', 100);  // Separator line used for formatting the console output
    #endregion
 }
 #endregion
