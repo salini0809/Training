@@ -16,24 +16,23 @@ class Program {
    /// <summary>Tests the parser with different file paths and displays the results</summary>
    public static void Main () {
       WriteLine ($"{"Input",-40}{"Drive",-8}{"Folder",-18}{"File",-16}{"Ext",-8}Result");
-      WriteLine (new string ('-', 100));
+      WriteLine (sHeader);
       int passed = 0; bool ok;
       foreach (var path in sTestData) {
-         var result = Parse (path);
-         if (ok = result.Drive.Length > 0) passed++;
+         if (ok = TryParse (path, out var result)) passed++;
          Write ($"{"\"" + path + "\"",-40}{result}");
          ForegroundColor = ok ? ConsoleColor.Green : ConsoleColor.Red;
          WriteLine (ok ? "Passed" : "Failed");
          ResetColor ();
       }
-      WriteLine (new string ('-', 100));
+      WriteLine (sHeader);
       WriteLine ($"{sTestData.Length} test paths: {passed} parsed, {sTestData.Length - passed} rejected.");
    }
    #endregion
 
    #region Implementation -------------------------------------------
    // Parses a file path and extracts the drive, folder, file name and extension
-   static ParseResult Parse (string path) {
+   static bool TryParse (string path, out ParseResult result) {
       EState state = A;
       Action none = () => { }, todo;
       string drive = "";
@@ -53,8 +52,10 @@ class Program {
          todo ();
          if (state == Z) break;
       }
-      return state == H ? new ParseResult (drive, folder.ToString (), file.ToString (), ext.ToString ())
-                        : new ParseResult ("", "", "", "");
+      bool parsed = state == H;
+      result = parsed ? new ParseResult (drive, folder.ToString (), file.ToString (), ext.ToString ())
+                      : ParseResult.Empty;
+      return parsed;
    }
    #endregion
 
@@ -71,6 +72,7 @@ class Program {
          @"C:\ABC\FILE.TXT~",@"CD:\ABC\FILE.TXT", @"C:\ABC:D", @"C:\\ABC\FILE.TXT",
          @"C:\DIR\\FILE.TXT",@"C:\DIR\ARCHIVE.TAR.GZ", "C:/ABC/FILE.TXT", @"C:\ABC\FILE\TXT"
     };
+   static string sHeader = new ('-', 100);  // Separator line used for formatting the console output
    #endregion
 }
 #endregion
@@ -78,7 +80,12 @@ class Program {
 #region Struct ParseResult ------------------------------------------------------------------------
 /// <summary>Stores the parsed components of a file path and provides formatted string representation</summary>
 readonly record struct ParseResult (string Drive, string Folder, string File, string Extension) {
-   #region Methods --------------------------------------------------
+   #region Properties -----------------------------------------------
+   /// <summary>Returns an empty parse result with default placeholder</summary>
+   public static ParseResult Empty => new ("-", "-", "-", "-");
+   #endregion
+
+   #region Overrides ------------------------------------------------
    /// <summary>Returns the parsed file path components as a formatted string</summary>
    public override string ToString () => $"{Drive,-8}{Folder,-18}{File,-16}{Extension,-8}";
    #endregion
@@ -88,7 +95,7 @@ readonly record struct ParseResult (string Drive, string Folder, string File, st
 #region enum EState -------------------------------------------------------------------------------
 /// <summary>Represents the states used to validate and parse a file path</summary>
 enum EState {
-   A,   // A: nothing read yet
+   A,   // A: initial state
    B,   // B: drive letter read
    C,   // C: ':' read
    D,   // D: '\' read, a name must follow
