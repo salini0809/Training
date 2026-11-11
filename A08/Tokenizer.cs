@@ -5,20 +5,20 @@
 // Tokenizer.cs
 // Parses the input expression and generates tokens for evaluation
 // ------------------------------------------------------------------------------------------------
-#region class Tokenizer----------------------------------------------------------------------------
+#region class Tokenizer ---------------------------------------------------------------------------
 /// <summary>Scans expression text and produces tokens for the evaluator</summary>
 class Tokenizer {
-   #region Constructors----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes the tokenizer with the evaluator and expression text</summary>
    public Tokenizer (Evaluator eval, string text) => (mEval, mText) = (eval, text);
    #endregion
 
-   #region Properties------------------------------------------------
-   // Indicates whether the next value must be an operand, helping distinguish unary and binary +/-.
+   #region Properties -----------------------------------------------
+   // Indicates whether the next value must be an operand, helping distinguish unary and binary +/-
    bool IsOperandExpected => mPrev is null or TOperator or TPunctuation { Punct: '(' };
    #endregion
 
-   #region Methods---------------------------------------------------
+   #region Methods --------------------------------------------------
    /// <summary>Returns the next token from input expression</summary>
    public Token Next () {
       mPrev = Read ();
@@ -26,8 +26,8 @@ class Tokenizer {
    }
    #endregion
 
-   #region Implementation--------------------------------------------
-   // Reads the next token from the current input position.
+   #region Implementation -------------------------------------------
+   // Reads the next token from the current input position
    Token Read () {
       while (mN < mText.Length) {
          char ch = mText[mN++];
@@ -45,7 +45,7 @@ class Tokenizer {
       return new TEnd ();
    }
 
-   // Reads a name: either a known function or a variable
+   // Reads a name either a known function or a variable
    Token GetIdentifier () {
       int start = mN - 1;
       while (mN < mText.Length && char.IsAsciiLetterOrDigit (mText[mN])) mN++;
@@ -56,7 +56,7 @@ class Tokenizer {
 
    }
 
-   // Reads a numeric literal such as 12, 3.5, or .5.
+   // Reads a numeric literal such as 12, 3.5, or .5
    Token GetNumber () {
       int start = mN - 1;
       while (mN < mText.Length && (char.IsAsciiDigit (mText[mN]) || mText[mN] == '.')) mN++;
@@ -66,11 +66,11 @@ class Tokenizer {
    }
    #endregion
 
-   #region Private data----------------------------------------------
+   #region Private data ---------------------------------------------
    readonly Evaluator mEval;  // The evaluator that owns this
    readonly string mText;     // The input text we're parsing through
    int mN;                    // Position within the text
-   Token? mPrev;              // The token returned last (null at the very start)
+   Token? mPrev;              // The token returned last,it will be null at the very start
    #endregion
 }
 #endregion

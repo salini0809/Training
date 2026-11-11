@@ -9,9 +9,9 @@ using static System.Console;
 using static System.ConsoleColor;
 
 #region class Program -----------------------------------------------------------------------------
-/// <summary>Displays the main menu, handles interactive mode ,and runs predefined tests</summary>
+/// <summary>Displays the main menu, handles interactive mode and runs predefined tests</summary>
 class Program {
-   #region  Methods--------------------------------------------------
+   #region  Methods -------------------------------------------------
    /// <summary>Application entry point that displays the menu and handles the user's choice</summary>
    public static void Main (string[] args) {
       for (; ; ) {
@@ -31,7 +31,7 @@ class Program {
    #endregion
 
    #region Implementation -------------------------------------------
-   // Reads and evaluates user expressions until the user enters "exit" or input ends.
+   // Reads and evaluates user expressions until the user enters exit or input ends
    static void InteractiveMode () {
       Print ("enter \"exit\" to end the program\n");
       var eval = new Evaluator ();
@@ -44,21 +44,20 @@ class Program {
          try {
             double result = eval.Evaluate (line);
             Print ($"{Format (result)}\n", Green);
-
          } catch (Exception e) {
             Print ($"{e.Message}\n", Red);
          }
       }
    }
 
-   // Runs predefined test cases, compares actual and expected results, and displays PASS/FAIL.
+   // Runs predefined test cases, compares actual and expected results, and displays PASS/FAIL
    static bool RunTests () {
       var eval = new Evaluator ();
       string line = new ('-', 118);
       Print ($"\n{"Expression",-24} | {"Expected",-10} | {"Actual",-10} | {"Status",-6} | Error message\n");
       Print (line + "\n");
       int passed = 0;
-      foreach (var (input, expected) in sTests) {
+      foreach (var (input, expected) in sTestData) {
          double actual = double.NaN;
          string error = "";
          try {
@@ -75,14 +74,14 @@ class Program {
          Print ($"{error}\n", Red);
       }
       Print (line + "\n");
-      Print ($"Passed {passed} of {sTests.Length}\n", passed == sTests.Length ? Green : Red);
-      return passed == sTests.Length;
+      Print ($"Passed {passed} of {sTestData.Length}\n", passed == sTestData.Length ? Green : Red);
+      return passed == sTestData.Length;
    }
 
-   // Formats a number to 15 significant digits or returns "NaN" for Not-a-Number.
+   // Formats a number to 15 significant digits or returns NaN for Not-a-Number
    static string Format (double d) => double.IsNaN (d) ? "NaN" : d.ToString ("G15");
 
-   // Prints text in an optional console colour and then resets the colour.
+   // Prints text in an optional console colour and then resets the colour
    static void Print (string result, ConsoleColor? color = null) {
       if (color != null) ForegroundColor = color.Value;
       Write (result);
@@ -90,12 +89,12 @@ class Program {
    }
    #endregion
 
-   #region Private data----------------------------------------------
-   const double NAN = double.NaN;     // Represents an expected error in a test case.
-   const double TOLERANCE = 1e-9;     // Maximum allowed difference when comparing numerical results.
+   #region Private data ---------------------------------------------
+   const double NAN = double.NaN;     // Represents an expected error in a test case
+   const double TOLERANCE = 1e-9;     // Maximum allowed difference when comparing numerical results
    // Stores predefined expressions and their expected results for testing
-   static readonly (string Input, double Expected)[] sTests = {
-      // Unary minus: basic cases
+   static readonly (string Input, double Expected)[] sTestData = {
+      // Unary minus basic cases
       ("-5", -5),
       ("--5", 5),
       ("-(2+3)", -5),
@@ -109,7 +108,7 @@ class Program {
       ("-2*-3", 6),
       ("(5)-3", 2),
       ("(-5)-3", -8),
-      // Unary minus priority (lower than ^, higher than * and /)
+      // Unary minus priority lower than ^, higher than * and /
       ("-2^2", -4),
       ("(-2)^2", 4),
       ("2^-2", 0.25),

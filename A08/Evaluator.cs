@@ -7,37 +7,38 @@
 // assignments while handling errors
 // ------------------------------------------------------------------------------------------------
 #region class EvalException -----------------------------------------------------------------------
-/// <summary>Raised for any problem in the expression (syntax or math)</summary>
+/// <summary>Represents errors encountered during expression evaluation,including syntax and mathematical errors</summary>
 class EvalException : Exception {
-
-   #region Constructors----------------------------------------------
-   /// <summary>Creates an evaluation exception with the specified message.</summary>
+   #region Constructors ---------------------------------------------
+   /// <summary>Creates an evaluation exception with the specified message</summary>
    public EvalException (string message) : base (message) { }
    #endregion
 }
 #endregion
 
 #region class Evaluator ---------------------------------------------------------------------------
-/// <summary>Evaluates mathematical expressions using operator precedence, stacks, functions, and variables.</summary>
+/// <summary>Evaluates mathematical expressions using operator precedence, stacks, functions, and variables</summary>
 class Evaluator {
-   #region Properties ----------------------------------------------
-   /// <summary>Gets the current bracket-depth priority bonus; only the class can set it.</summary>
+   #region Properties -----------------------------------------------
+   /// <summary>Gets the current bracket-depth priority bonus only the class can set it</summary>
    public int BasePriority { get; private set; }
    #endregion
 
-   #region Methods -------------------------------------------------
-   /// <summary>Evaluates an expression, updates assigned variables, and returns the r
+   #region Methods --------------------------------------------------
+   /// <summary>Evaluates an expression, updates assigned variables and returns the result</summary>
    public double Evaluate (string text) {
       Reset ();
       var tokens = Tokenize (text);
+      var count = tokens.Count;
+      if (count == 0) throw new EvalException ("Empty expression");
       string? target = null;
-      if (tokens.Count > 1 && tokens[0] is TVariable tv && tokens[1] is TOpArithmetic { Op: '=' }) {
-         if (tokens.Count == 2) throw new EvalException ("Missing expression after '='");
+      if (count > 1 && tokens[0] is TVariable tv && tokens[1] is TOpArithmetic { Op: '=' }) {
+         if (count == 2) throw new EvalException ("Missing expression after '='");
          target = tv.Name;
          tokens.RemoveRange (0, 2);
+         count -= 2;
       }
-      if (tokens.Count == 0) throw new EvalException ("Empty expression");
-      for (int i = 0; i + 1 < tokens.Count; i++)
+      for (int i = 0; i + 1 < count; i++)
          if (tokens[i] is TVariable v && tokens[i + 1] is TPunctuation { Punct: '(' })
             throw new EvalException ($"Unknown function '{v.Name}'");
       foreach (var t in tokens) Process (t);
@@ -50,18 +51,17 @@ class Evaluator {
       return result;
    }
 
-   /// <summary>Returns a variable's stored value or throws an error if it is undefined.</summary>
+   /// <summary>Returns a variable's stored value or throws an error if it is undefined</summary>
    public double GetVariable (string name) => mVars.TryGetValue (name, out double f) ? f :
       throw new EvalException ($"Unknown variable: {name}");
    #endregion
 
    #region Implementation -------------------------------------------
-   // Converts expression text into tokens and throws an error if tokenization fails.
+   // Converts expression text into tokens and throws an error if tokenization fails
    List<Token> Tokenize (string text) {
       var tokens = new List<Token> ();
       var tokenizer = new Tokenizer (this, text);
-      for (; ; )
-      {
+      for (; ; ) {
          var token = tokenizer.Next ();
          if (token is TEnd) break;
          if (token is TError err) throw new EvalException (err.Message);
@@ -104,14 +104,14 @@ class Evaluator {
       }
    }
 
-   // Determines whether an incoming operator can be pushed without applying the current top operator.
+   // Determines whether an incoming operator can be pushed without applying the current top operator
    bool OkToPush (TOperator op) {
       var top = mOperators.Peek ();
       if (top.FinalPriority != op.FinalPriority) return top.FinalPriority < op.FinalPriority;
       return op is TOpArithmetic { IsRightAssociative: true };
    }
 
-   // Pops the top operator, applies it to its operand(s) and pushes the result
+   // Pops the top operator,applies it to its operands and pushes the result
    void ApplyOperator () {
       var op = mOperators.Pop ();
       double result;
@@ -129,11 +129,11 @@ class Evaluator {
       mOperands.Push (result);
    }
 
-   // Removes and returns the top operand, or throws an error if none is available.
+   // Removes and returns the top operand, or throws an error if none is available
    double PopOperand ()
       => mOperands.Count > 0 ? mOperands.Pop () : throw new EvalException ("Too few operands");
 
-   // Clears the working stacks and resets expression state while preserving variables.
+   // Clears the working stacks and resets expression state while preserving variables
    void Reset () {
       mOperands.Clear ();
       mOperators.Clear ();
@@ -142,11 +142,11 @@ class Evaluator {
    }
    #endregion
 
-   #region Private data ---------------------------------------------------
-   readonly Stack<double> mOperands = new ();          // Stores numeric operands waiting to be processed.
+   #region Private data ---------------------------------------------
+   readonly Stack<double> mOperands = new ();          // Stores numeric operands waiting to be processed
    readonly Stack<TOperator> mOperators = new ();      // Stores operators waiting to be applied according to precedence
    readonly Dictionary<string, double> mVars = new (); // Stores variable names and their assigned values
-   bool mExpectOperand = true;                         // Indicates whether the next token must provide an operand.
+   bool mExpectOperand = true;                         // Indicates whether the next token must provide an operand
    #endregion
 }
 #endregion
