@@ -15,7 +15,7 @@ abstract class Token {
 
    #region Overrides ------------------------------------------------
    /// <summary>Returns the token's class name and text</summary>
-   public override string ToString ()=> $"{GetType().Name}.({Text})";
+   public override string ToString () => $"{GetType ().Name}.({Text})";
    #endregion
 }
 #endregion
@@ -126,13 +126,13 @@ class TOpArithmetic : TOperator {
    #region Methods --------------------------------------------------
    /// <summary>Performs the specified binary arithmetic operation</summary>
    public double Evaluate (double a, double b) => Op switch {
-         '+' => a + b,
-         '-' => a - b,
-         '*' => a * b,
-         '/' => b==0? throw new EvalException("Divide by zero"): a/b,
-         '^' => Math.Pow (a, b),
-         _ => throw new EvalException ($"Unknown operator: {Op}"),
-    };
+      '+' => a + b,
+      '-' => a - b,
+      '*' => a * b,
+      '/' => b == 0 ? mEval.Error ("Divide by zero") : a / b,
+      '^' => Math.Pow (a, b),
+      _ => mEval.Error ($"Unknown operator: {Op}"),
+   };
    #endregion
 
    #region Private data ---------------------------------------------
@@ -171,7 +171,7 @@ class TOpUnary : TOperator {
    public double Evaluate (double a) => Op switch {
       '-' => -a,
       '+' => a,
-      _ => throw new EvalException ($"Unknown unary operator '{Op}'")
+      _ => mEval.Error ($"Unknown unary operator '{Op}'")
    };
    #endregion
 }
@@ -201,17 +201,17 @@ class TOpFunction : TOperator {
    #region Methods --------------------------------------------------
    /// <summary>Evaluates the specified mathematical function</summary>
    public double Evaluate (double f) => Func switch {
-         "sin" => Math.Sin (D2R (f)),
-         "cos" => Math.Cos (D2R (f)),
-         "tan" => Math.Tan (D2R (f)),
-         "sqrt" => Math.Sqrt (f),
-         "log" => Math.Log (f),
-         "exp" => Math.Exp (f),
-         "asin" => R2D (Math.Asin (f)),
-         "acos" => R2D (Math.Acos (f)),
-         "atan" => R2D (Math.Atan (f)),
-         _ => throw new EvalException ($"Unknown function: {Func}")
-      };
+      "sin" => Math.Sin (D2R (f)),
+      "cos" => Math.Cos (D2R (f)),
+      "tan" => Math.Tan (D2R (f)),
+      "sqrt" => Math.Sqrt (f),
+      "log" => Math.Log (f),
+      "exp" => Math.Exp (f),
+      "asin" => R2D (Math.Asin (f)),
+      "acos" => R2D (Math.Acos (f)),
+      "atan" => R2D (Math.Atan (f)),
+      _ => mEval.Error ($"Unknown function: {Func}")
+   };
 
 
    /// <summary>Checks whether the given name is a supported mathematical function</summary>
@@ -259,7 +259,7 @@ class TPunctuation : Token {
 class TEnd : Token {
    #region Properties -----------------------------------------------
    /// </summary>Returns the text indicating the end of input</summary
-   public override string Text=> "end";
+   public override string Text => "end";
    #endregion
 }
 #endregion
@@ -278,7 +278,7 @@ class TError : Token {
    public string Message { get; private set; }
 
    /// <summary>Returns the error message as the token's text</summary>
-   public override string Text=>Message;
+   public override string Text => Message;
    #endregion
 }
 #endregion

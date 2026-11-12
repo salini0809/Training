@@ -47,6 +47,7 @@ class Program {
          } catch (Exception e) {
             Print ($"{e.Message}\n", Red);
          }
+
       }
    }
 
@@ -65,8 +66,7 @@ class Program {
          } catch (Exception e) {
             error = e.Message;
          }
-         bool pass = double.IsNaN (expected) ? error != ""
-                    : error == "" && Math.Abs (actual - expected) < TOLERANCE;
+         bool pass = double.IsNaN (expected) ? error != "" : error == "" && Math.Abs (actual - expected) < TOLERANCE;
          if (pass) passed++;
          Print ($"{input,-24} | {Format (expected),-10} | {Format (actual),-10} | ");
          Print ($"{(pass ? "PASS" : "FAIL"),-6}", pass ? Green : Red);
