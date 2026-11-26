@@ -7,8 +7,12 @@
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
 
+#region Class Program -----------------------------------------------------------------------------
+/// <summary>Converts numeric strings into double values using a custom parsing implementation</summary>
 class Program {
-   static void Main () {
+   #region Methods --------------------------------------------------
+   /// <summary>Tests the custom double parser against predefined inputs and compares the results with Double.TryParse</summary>
+   public static void Main () {
       var testCases = new string[] {"+","e5","12345","+123","-123","123.45",".45","45.","1e5",
          "1e+5","1e-5","1.25e3","1.25E3","  123.45  ","000123","1e308","1e-308","NaN","","1.2.3",
          "1e+","1e2e3","--123","12abc","1e309","1e-325"};
@@ -18,7 +22,9 @@ class Program {
          WriteLine ($"Input: \"{testCase}\"\n Result: {result}\n Expected:{expected}\n");
       }
    }
+   #endregion
 
+   #region Implementation -------------------------------------------
    // Converts a string to a double, handling signs, integer and decimal parts, and scientific notation.
    static double DoubleParse (string input) {
       input = input.Trim ();
@@ -84,6 +90,11 @@ class Program {
       // Applies the original sign and returns the final parsed value.
       return isNegative ? -number : number;
    }
+   #endregion
 
+   #region Constants ------------------------------------------------
+   // Represents an invalid or unparseable numeric input
    const double NAN = double.NaN;
+   #endregion
 }
+#endregion
