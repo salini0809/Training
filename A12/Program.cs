@@ -10,9 +10,7 @@
 class Program {
    #region Methods --------------------------------------------------
    /// <summary>Creates a Wordle game instance and starts the game</summary>
-   public static void Main () {
-      new Wordle ().Run ();
-   }
+   public static void Main () => new Wordle ().Run ();
    #endregion
 }
 #endregion

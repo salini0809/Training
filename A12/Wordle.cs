@@ -8,6 +8,7 @@
 using System.Text;
 using static LetterStatus;
 using static System.Console;
+
 #region class Wordle ------------------------------------------------------------------------------
 /// <summary>Implements a console-based Wordle game where players guess a five-letter secret word within six attempts</summary>
 class Wordle {
@@ -47,17 +48,14 @@ class Wordle {
       switch (key.Key) {
          case ConsoleKey.Backspace:
          case ConsoleKey.LeftArrow:
-            if (mCurrent.Length > 0)
-               mCurrent = mCurrent.Substring (0, mCurrent.Length - 1);
+            if (mCurrent.Length > 0) mCurrent = mCurrent.Substring (0, mCurrent.Length - 1);
             break;
          case ConsoleKey.Enter:
-            if (mCurrent.Length == 5)
-               SubmitWord ();
+            if (mCurrent.Length == 5) SubmitWord ();
             break;
          default:
             char ch = char.ToUpper (key.KeyChar);
-            if (ch >= 'A' && ch <= 'Z' && mCurrent.Length < 5)
-               mCurrent += ch;
+            if (ch >= 'A' && ch <= 'Z' && mCurrent.Length < 5) mCurrent += ch;
             break;
       }
    }
@@ -65,7 +63,7 @@ class Wordle {
    // Validates the submitted word, calculates letter scores,updates the keyboard status and checks the game result
    void SubmitWord () {
       if (!mDictionary.Contains (mCurrent)) {
-         mMessage = mCurrent + " is not a valid  word";
+         mMessage = $"{mCurrent} is not a valid  word";
          return;
       }
       LetterStatus[] scores = ScoreGuess (mCurrent, mSecret);
@@ -85,13 +83,12 @@ class Wordle {
       LetterStatus[] result = new LetterStatus[5];
       int[] remaining = new int[26];
       for (int i = 0; i < 5; i++) {
-         result[i] = guess[i] == answer[i] ? Green : Gray;
-         if (result[i] == Gray)
-            remaining[answer[i] - 'A']++;
+         result[i] = guess[i] == answer[i] ? CorrectPosition : NotInWord;
+         if (result[i] == NotInWord) remaining[answer[i] - 'A']++;
       }
       for (int i = 0; i < 5; i++) {
-         if (result[i] == Gray && remaining[guess[i] - 'A'] > 0) {
-            result[i] = Blue;
+         if (result[i] == NotInWord && remaining[guess[i] - 'A'] > 0) {
+            result[i] = WrongPosition;
             remaining[guess[i] - 'A']--;
          }
       }
@@ -100,9 +97,9 @@ class Wordle {
 
    // Returns the console color corresponding to a letter status
    ConsoleColor ColorFor (LetterStatus status) => status switch {
-      Green => ConsoleColor.Green,
-      Blue => ConsoleColor.Blue,
-      Gray => ConsoleColor.DarkGray,
+      CorrectPosition => ConsoleColor.Green,
+      WrongPosition => ConsoleColor.Blue,
+      NotInWord => ConsoleColor.DarkGray,
       _ => ConsoleColor.White
    };
 
@@ -145,16 +142,15 @@ class Wordle {
          LetterStatus status = mKeyStatus.GetValueOrDefault (letter, Unused);
          WriteAt (left + (k % 7) * 4, TOP + 7 + k / 7, letter.ToString (), ColorFor (status));
       }
-      for (int r = 11; r <= 14; r++) ClearLine (TOP + r);
+      ClearLine (TOP + 12);
       if (mGameOver) {
          WriteAt (left, TOP + 11, new string ('─', WIDTH), ConsoleColor.DarkGray);
          WriteCentered (left, TOP + 12,
-             mWon ? "You found the word in " + mGuesses.Count + " tries" : "Sorry - the word was " + mSecret,
+             mWon ? $"You found the word in  {mGuesses.Count}  tries" : $"Sorry - the word was  {mSecret}",
              mWon ? ConsoleColor.Green : ConsoleColor.Yellow);
          WriteCentered (left, TOP + 14, "Press any key to quit", ConsoleColor.White);
-      } else if (mMessage != "") {
+      } else if (!string.IsNullOrEmpty (mMessage))
          WriteCentered (left, TOP + 12, mMessage, ConsoleColor.Yellow);
-      }
    }
    #endregion
 
@@ -181,5 +177,5 @@ class Wordle {
 
 #region Enum LetterStatus -------------------------------------------------------------------------
 /// <summary>Represents the evaluation status of each letter in a Wordle guess</summary>
-public enum LetterStatus { Unused, Gray, Blue, Green }
+public enum LetterStatus { Unused, NotInWord, WrongPosition, CorrectPosition }
 #endregion
