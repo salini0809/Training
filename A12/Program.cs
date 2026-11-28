@@ -5,12 +5,20 @@
 // Program.cs
 // Entry point for the wordle game.
 // ------------------------------------------------------------------------------------------------
-#region Class Program -----------------------------------------------------------------------------
+#region class Program -----------------------------------------------------------------------------
 /// <summary>Serves as the entry point for the Wordle application</summary>
 class Program {
    #region Methods --------------------------------------------------
    /// <summary>Creates a Wordle game instance and starts the game</summary>
-   public static void Main () => new Wordle ().Run ();
+   public static void Main () {
+      try {
+         WordBank wordBank = new WordBank ();
+         Wordle game = new (wordBank);
+         game.Run ();
+      } catch (FileNotFoundException ex) {
+         Console.WriteLine ($"Required file not found: {ex.FileName}");
+      }
+   }
    #endregion
 }
 #endregion

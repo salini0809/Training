@@ -6,23 +6,31 @@
 // Implements the Wordle game by handling user input, word validation and result display.
 // ------------------------------------------------------------------------------------------------
 using System.Text;
-using static LetterStatus;
+using static ELetterStatus;
+using static EGameState;
 using static System.Console;
+using static System.ConsoleColor;
 
 #region class Wordle ------------------------------------------------------------------------------
 /// <summary>Implements a console-based Wordle game where players guess a five-letter secret word within six attempts</summary>
 class Wordle {
+   #region Constructor ----------------------------------------------
+   /// <summary>Initializes a new Wordle game with the specified word bank</summary>
+   public Wordle (WordBank wordBank) {
+      mWordBank = wordBank;
+   }
+   #endregion
+
    #region Methods --------------------------------------------------
    /// <summary>Initializes and runs the Wordle game, handling user input and updating the game board until the game ends</summary>
    public void Run () {
       OutputEncoding = Encoding.UTF8;
       CursorVisible = false;
       Clear ();
-      LoadWords ();
-      SelectWord ();
+      mSecret = mWordBank.GetRandomWord ();
       DisplayBoard ();
-      while (!mGameOver) {
-         UpdateGameState (Console.ReadKey (true));
+      while (mState == InProgress) {
+         UpdateGameState (ReadKey (true));
          DisplayBoard ();
       }
       ReadKey (true);
@@ -32,61 +40,51 @@ class Wordle {
    #endregion
 
    #region Implementation -------------------------------------------
-   // Loads the puzzle words and valid dictionary words from text files
-   void LoadWords () {
-      mPuzzleWords.AddRange (File.ReadAllLines ("puzzle-5.txt"));
-      mDictionary.UnionWith (File.ReadAllLines ("dict-5.txt"));
-      mDictionary.UnionWith (mPuzzleWords);
-   }
-
-   // Randomly selects a secret word from the available puzzle words
-   void SelectWord () => mSecret = mPuzzleWords[new Random ().Next (mPuzzleWords.Count)];
-
    // Processes keyboard input and updates the current word
    void UpdateGameState (ConsoleKeyInfo key) {
       mMessage = "";
       switch (key.Key) {
          case ConsoleKey.Backspace:
          case ConsoleKey.LeftArrow:
-            if (mCurrent.Length > 0) mCurrent = mCurrent.Substring (0, mCurrent.Length - 1);
+            if (mCurrent.Length > 0) mCurrent = mCurrent[..^1];
             break;
          case ConsoleKey.Enter:
-            if (mCurrent.Length == 5) SubmitWord ();
+            if (mCurrent.Length == WORDLENGTH) SubmitWord ();
             break;
          default:
-            char ch = char.ToUpper (key.KeyChar);
-            if (ch >= 'A' && ch <= 'Z' && mCurrent.Length < 5) mCurrent += ch;
+            char ch = char.ToUpperInvariant (key.KeyChar);
+            if (ch is >= 'A' and <= 'Z' && mCurrent.Length < WORDLENGTH) mCurrent += ch;
             break;
       }
    }
 
    // Validates the submitted word, calculates letter scores,updates the keyboard status and checks the game result
    void SubmitWord () {
-      if (!mDictionary.Contains (mCurrent)) {
-         mMessage = $"{mCurrent} is not a valid  word";
+      if (!mWordBank.IsValidWord (mCurrent)) {
+         mMessage = $"{mCurrent} is not a valid word.";
          return;
       }
-      LetterStatus[] scores = ScoreGuess (mCurrent, mSecret);
+      ELetterStatus[] scores = ScoreGuess (mCurrent, mSecret);
       mGuesses.Add (mCurrent);
       mGuessScores.Add (scores);
-      for (int i = 0; i < 5; i++) {
-         LetterStatus old = mKeyStatus.GetValueOrDefault (mCurrent[i], Unused);
-         mKeyStatus[mCurrent[i]] = scores[i] > old ? scores[i] : old;
+      for (int i = 0; i < WORDLENGTH; i++) {
+         int k = mCurrent[i] - 'A';
+         if (scores[i] > mKeyStatus[k]) mKeyStatus[k] = scores[i];
       }
-      mWon = mCurrent == mSecret;
-      mGameOver = mWon || mGuesses.Count == MAXTRIES;
+      if (mCurrent == mSecret) mState = Won;
+      else if (mGuesses.Count == MAXTRIES) mState = Lost;
       mCurrent = "";
    }
 
    // Evaluates a guess against the secret word and returns the status of each letter
-   LetterStatus[] ScoreGuess (string guess, string answer) {
-      LetterStatus[] result = new LetterStatus[5];
+   ELetterStatus[] ScoreGuess (string guess, string answer) {
+      ELetterStatus[] result = new ELetterStatus[WORDLENGTH];
       int[] remaining = new int[26];
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < WORDLENGTH; i++) {
          result[i] = guess[i] == answer[i] ? CorrectPosition : NotInWord;
          if (result[i] == NotInWord) remaining[answer[i] - 'A']++;
       }
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < WORDLENGTH; i++) {
          if (result[i] == NotInWord && remaining[guess[i] - 'A'] > 0) {
             result[i] = WrongPosition;
             remaining[guess[i] - 'A']--;
@@ -96,11 +94,11 @@ class Wordle {
    }
 
    // Returns the console color corresponding to a letter status
-   ConsoleColor ColorFor (LetterStatus status) => status switch {
-      CorrectPosition => ConsoleColor.Green,
-      WrongPosition => ConsoleColor.Blue,
-      NotInWord => ConsoleColor.DarkGray,
-      _ => ConsoleColor.White
+   ConsoleColor ColorFor (ELetterStatus status) => status switch {
+      CorrectPosition => Green,
+      WrongPosition => Blue,
+      NotInWord => DarkGray,
+      _ => White
    };
 
    // Clears the specified console row
@@ -121,61 +119,66 @@ class Wordle {
    void WriteCentered (int left, int row, string text, ConsoleColor color) =>
        WriteAt (left + Math.Max (0, (WIDTH - text.Length) / 2), row, text, color);
 
+   // Returns the character to display in the specified game board cell
+   string CellText (int row, int col) {
+      if (row < mGuesses.Count) return mGuesses[row][col].ToString ();
+      if (row > mGuesses.Count) return "\u00B7";
+      if (col < mCurrent.Length) return mCurrent[col].ToString ();
+      return col == mCurrent.Length ? "\u25CC" : "\u00B7";
+   }
+
    // Renders the game grid, on-screen keyboard and game messages
    void DisplayBoard () {
       int left = Math.Max (0, (WindowWidth - WIDTH) / 2);
       for (int r = 0; r < MAXTRIES; r++) {
-         for (int c = 0; c < 5; c++) {
-            bool submitted = r < mGuesses.Count;
-            bool typingRow = r == mGuesses.Count;
-            string text = submitted ? mGuesses[r][c].ToString ()
-                        : typingRow && c < mCurrent.Length ? mCurrent[c].ToString ()
-                        : typingRow && c == mCurrent.Length ? "◌"
-                        : "·";
-            ConsoleColor color = submitted ? ColorFor (mGuessScores[r][c]) : ConsoleColor.White;
+         for (int c = 0; c < WORDLENGTH; c++) {
+            string text = CellText (r, c);
+            ConsoleColor color = r < mGuesses.Count ? ColorFor (mGuessScores[r][c]) : White;
             WriteAt (left + 8 + c * 2, TOP + r, text, color);
          }
       }
-      WriteAt (left, TOP + 6, new string ('─', WIDTH), ConsoleColor.DarkGray);
+      WriteAt (left, TOP + 6, sSeparator, DarkGray);
       for (int k = 0; k < 26; k++) {
          char letter = (char)('A' + k);
-         LetterStatus status = mKeyStatus.GetValueOrDefault (letter, Unused);
+         ELetterStatus status = mKeyStatus[letter - 'A'];
          WriteAt (left + (k % 7) * 4, TOP + 7 + k / 7, letter.ToString (), ColorFor (status));
       }
       ClearLine (TOP + 12);
-      if (mGameOver) {
-         WriteAt (left, TOP + 11, new string ('─', WIDTH), ConsoleColor.DarkGray);
-         WriteCentered (left, TOP + 12,
-             mWon ? $"You found the word in  {mGuesses.Count}  tries" : $"Sorry - the word was  {mSecret}",
-             mWon ? ConsoleColor.Green : ConsoleColor.Yellow);
-         WriteCentered (left, TOP + 14, "Press any key to quit", ConsoleColor.White);
+      if (mState != InProgress) {
+         WriteAt (left, TOP + 11, sSeparator, DarkGray);
+         if (mState == Won)
+            WriteCentered (left, TOP + 12, $"You found the word in {mGuesses.Count} " +
+               $"{(mGuesses.Count == 1 ? "try" : "tries")}.", Green);
+         else
+            WriteCentered (left, TOP + 12, $"Sorry - the word was {mSecret}", Yellow);
+         WriteCentered (left, TOP + 14, "Press any key to quit", White);
       } else if (!string.IsNullOrEmpty (mMessage))
-         WriteCentered (left, TOP + 12, mMessage, ConsoleColor.Yellow);
+         WriteCentered (left, TOP + 12, mMessage, Yellow);
    }
    #endregion
 
    #region Private Data ---------------------------------------------
-   List<string> mPuzzleWords = [];                  // Possible secret words
-   HashSet<string> mDictionary = [];                // All valid guess words
-   string mSecret = "";                             // Randomly selected secret word
-   List<string> mGuesses = [];                      // Submitted valid guesses
-   List<LetterStatus[]> mGuessScores = [];          // Letter colors for submitted guesses
-   string mCurrent = "";                            //  Word currently being typed
-   string mMessage = "";                            // Feedback or error message
-   Dictionary<char, LetterStatus> mKeyStatus = [];  // Best status of each keyboard letter
-   bool mGameOver = false;                          // Indicates whether the game has ended
-   bool mWon = false;                               // Indicates whether the player guessed correctly
-   #endregion
-
-   #region Constants ------------------------------------------------
-   const int WIDTH = 25;                     // Total width of the game display
-   const int TOP = 1;                        // Starting console row of the game board
-   const int MAXTRIES = 6;                   // Maximum number of valid guesses
+   WordBank mWordBank;
+   EGameState mState;
+   string mSecret = "";                                       // Randomly selected secret word
+   string mCurrent = "";                                      //  Word currently being typed
+   string mMessage = "";                                      // Feedback or error message
+   List<string> mGuesses = [];                                // Submitted valid guesses
+   List<ELetterStatus[]> mGuessScores = [];                   // Letter colors for submitted guesses
+   ELetterStatus[] mKeyStatus = new ELetterStatus[26];        // Best status of each keyboard letter
+   static readonly string sSeparator = new ('\u2500', WIDTH); // Horizontal separator displayed between the game board and keyboard
+   const int WIDTH = 25;                                      // Total width of the game display
+   const int TOP = 1;                                         // Starting console row of the game board
+   const int MAXTRIES = 6;                                    // Maximum number of valid guesses
+   const int WORDLENGTH = 5;                                  // Maximum Length of the word
    #endregion
 }
 #endregion
 
-#region Enum LetterStatus -------------------------------------------------------------------------
+#region enum --------------------------------------------------------------------------------------
 /// <summary>Represents the evaluation status of each letter in a Wordle guess</summary>
-public enum LetterStatus { Unused, NotInWord, WrongPosition, CorrectPosition }
+enum ELetterStatus { Unused, NotInWord, WrongPosition, CorrectPosition }
+
+/// <summary>Represents the current state of the Wordle game</summary>
+enum EGameState { InProgress, Won, Lost }
 #endregion
